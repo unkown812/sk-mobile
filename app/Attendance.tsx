@@ -62,7 +62,7 @@ const Attendance = () => {
   const [attendanceMap, setAttendanceMap] = useState<Record<number, Record<number, string>>>({});
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
-    return now.toISOString().slice(0, 7); // YYYY-MM
+    return now.toISOString().slice(0, 7); 
   });
   const [daysInMonth, setDaysInMonth] = useState<number>(
     new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()

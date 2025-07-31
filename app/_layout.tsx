@@ -84,7 +84,27 @@ function RootLayoutNav() {
               title: 'Fees',
             }}
           />
-          {/* Removed the +not-found screen from drawer to hide it */}
+          <Drawer.Screen
+            name="Attendance" // This is the name of the page and must match the url from root
+            options={{
+              drawerLabel: 'Attendance',
+              title: 'Attendance',
+            }}
+          />
+          <Drawer.Screen
+            name="Settings" // This is the name of the page and must match the url from root
+            options={{
+              drawerLabel: 'Settings',
+              title: 'Settings',
+            }}
+          />
+          <Drawer.Screen
+            name="Login" // This is the name of the page and must match the url from root
+            options={{
+              drawerLabel: '',
+              title: 'Login',
+            }}
+          />
         </Drawer>
       </GestureHandlerRootView>
     </ThemeProvider>
