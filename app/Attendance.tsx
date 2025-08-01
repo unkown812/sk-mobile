@@ -11,6 +11,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
+import { supabase } from '@/utils/supabase';
 
 interface Student {
   id: number;
@@ -94,10 +95,11 @@ const Attendance = () => {
       setLoading(true);
       setError(null);
       try {
-        // TODO: Replace with your supabase client fetch logic compatible with React Native
-        // Placeholder fetch simulation:
-        const studentsData: Student[] = [];
-        setStudents(studentsData);
+        const { data, error } = await supabase
+          .from('students')
+          .select('*');
+        if (error) throw error;
+        setStudents(data || []);
       } catch (err: unknown) {
         if (err instanceof Error) setError(err.message);
         else setError('Unknown error');
@@ -112,11 +114,16 @@ const Attendance = () => {
       setLoading(true);
       setError(null);
       try {
-        // TODO: Replace with your supabase client fetch logic compatible with React Native
-        // Placeholder fetch simulation:
-        const attendanceData: AttendanceRecord[] = [];
+        const startDate = new Date(selectedMonth + '-01');
+        const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
+        const { data, error } = await supabase
+          .from('attendance')
+          .select('*')
+          .gte('date', startDate.toISOString())
+          .lt('date', endDate.toISOString());
+        if (error) throw error;
         const map: Record<number, Record<number, string>> = {};
-        attendanceData.forEach((record: AttendanceRecord) => {
+        (data || []).forEach((record: AttendanceRecord) => {
           const day = new Date(record.date).getDate();
           if (!map[record.student_id]) map[record.student_id] = {};
           map[record.student_id][day] = record.status;
@@ -228,15 +235,31 @@ const Attendance = () => {
   const handleSaveAttendance = async () => {
     setLoading(true);
     setError(null);
-    try {
-      // TODO: Replace with your supabase client upsert logic compatible with React Native
-      Alert.alert('Success', 'Attendance saved successfully.');
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Unknown error');
-      Alert.alert('Error', 'Failed to save attendance');
-    }
-    setLoading(false);
+      try {
+        const recordsToUpsert: AttendanceRecord[] = [];
+        Object.entries(attendanceMap).forEach(([studentIdStr, days]) => {
+          const student_id = parseInt(studentIdStr, 10);
+          Object.entries(days).forEach(([dayStr, status]) => {
+            const day = parseInt(dayStr, 10);
+            const date = new Date(selectedMonth + '-' + (day < 10 ? '0' + day : day));
+            recordsToUpsert.push({
+              student_id,
+              date: date.toISOString().slice(0, 10),
+              status,
+            });
+          });
+        });
+        const { error } = await supabase
+          .from('attendance')
+          .upsert(recordsToUpsert, { onConflict: 'student_id,date' });
+        if (error) throw error;
+        Alert.alert('Success', 'Attendance saved successfully.');
+      } catch (err: unknown) {
+        if (err instanceof Error) setError(err.message);
+        else setError('Unknown error');
+        Alert.alert('Error', 'Failed to save attendance');
+      }
+      setLoading(false);
   };
 
   // Summary data for summary tab
@@ -342,7 +365,7 @@ const Attendance = () => {
                 styles.pickerItem,
                 selectedYear === year && styles.pickerItemSelected,
               ]}
-              onPress={() => setSelectedYear(typeof year === 'string' && year === 'All' ? 0 : year)}
+              onPress={() => setSelectedYear(year === 'All' ? 0 : (year as number))}
             >
               <Text
                 style={[
@@ -356,7 +379,7 @@ const Attendance = () => {
           ))}
         </ScrollView>
         </View>
-        <Text style={styles.label}>Select Month (YYYY-MM):</Text>
+        <Text style={styles.pickerLabel}>Select Month (YYYY-MM):</Text>
         <TextInput
           style={styles.textInput}
           value={selectedMonth}

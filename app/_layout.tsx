@@ -64,13 +64,6 @@ function RootLayoutNav() {
             }}
           />
           <Drawer.Screen
-            name="Dashboard" // This is the name of the page and must match the url from root
-            options={{
-              drawerLabel: 'Dashboard',
-              title: 'Dashboard',
-            }}
-          />
-          <Drawer.Screen
             name="Performance" // This is the name of the page and must match the url from root
             options={{
               drawerLabel: 'Performance',
@@ -98,13 +91,16 @@ function RootLayoutNav() {
               title: 'Settings',
             }}
           />
+          {/*
           <Drawer.Screen
             name="Login" // This is the name of the page and must match the url from root
             options={{
               drawerLabel: '',
               title: 'Login',
+              
             }}
           />
+          */}
         </Drawer>
       </GestureHandlerRootView>
     </ThemeProvider>
