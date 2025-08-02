@@ -43,7 +43,7 @@ const diplomaCourses = ['Computer Science', 'Mechanical', 'Electrical', 'Civil']
 
 const entranceExamCourses = ['NEET', 'JEE', 'MHTCET', 'Boards'];
 
-const years = [0, 1, 2, 3, 4]; // 0 means All
+const years = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]; 
 
 const tabs = [
   { id: 'mark', label: 'Mark Attendance' },
@@ -63,7 +63,7 @@ const Attendance = () => {
   const [attendanceMap, setAttendanceMap] = useState<Record<number, Record<number, string>>>({});
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
-    return now.toISOString().slice(0, 7); 
+    return now.toISOString().slice(0, 7);
   });
   const [daysInMonth, setDaysInMonth] = useState<number>(
     new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
@@ -235,31 +235,31 @@ const Attendance = () => {
   const handleSaveAttendance = async () => {
     setLoading(true);
     setError(null);
-      try {
-        const recordsToUpsert: AttendanceRecord[] = [];
-        Object.entries(attendanceMap).forEach(([studentIdStr, days]) => {
-          const student_id = parseInt(studentIdStr, 10);
-          Object.entries(days).forEach(([dayStr, status]) => {
-            const day = parseInt(dayStr, 10);
-            const date = new Date(selectedMonth + '-' + (day < 10 ? '0' + day : day));
-            recordsToUpsert.push({
-              student_id,
-              date: date.toISOString().slice(0, 10),
-              status,
-            });
+    try {
+      const recordsToUpsert: AttendanceRecord[] = [];
+      Object.entries(attendanceMap).forEach(([studentIdStr, days]) => {
+        const student_id = parseInt(studentIdStr, 10);
+        Object.entries(days).forEach(([dayStr, status]) => {
+          const day = parseInt(dayStr, 10);
+          const date = new Date(selectedMonth + '-' + (day < 10 ? '0' + day : day));
+          recordsToUpsert.push({
+            student_id,
+            date: date.toISOString().slice(0, 10),
+            status,
           });
         });
-        const { error } = await supabase
-          .from('attendance')
-          .upsert(recordsToUpsert, { onConflict: 'student_id,date' });
-        if (error) throw error;
-        Alert.alert('Success', 'Attendance saved successfully.');
-      } catch (err: unknown) {
-        if (err instanceof Error) setError(err.message);
-        else setError('Unknown error');
-        Alert.alert('Error', 'Failed to save attendance');
-      }
-      setLoading(false);
+      });
+      const { error } = await supabase
+        .from('attendance')
+        .upsert(recordsToUpsert, { onConflict: 'student_id,date' });
+      if (error) throw error;
+      Alert.alert('Success', 'Attendance saved successfully.');
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError('Unknown error');
+      Alert.alert('Error', 'Failed to save attendance');
+    }
+    setLoading(false);
   };
 
   // Summary data for summary tab
@@ -357,27 +357,27 @@ const Attendance = () => {
         </View>
         <View style={styles.pickerContainer}>
           <Text style={styles.pickerLabel}>Year:</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pickerScroll}>
-          {['All', ...years.slice(1)].map(year => (
-            <TouchableOpacity
-              key={year}
-              style={[
-                styles.pickerItem,
-                selectedYear === year && styles.pickerItemSelected,
-              ]}
-              onPress={() => setSelectedYear(year === 'All' ? 0 : (year as number))}
-            >
-              <Text
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pickerScroll}>
+            {['All', ...years.slice(1)].map(year => (
+              <TouchableOpacity
+                key={year}
                 style={[
-                  styles.pickerItemText,
-                  selectedYear === year && styles.pickerItemTextSelected,
+                  styles.pickerItem,
+                  selectedYear === year && styles.pickerItemSelected,
                 ]}
+                onPress={() => setSelectedYear(year === 'All' ? 0 : (year as number))}
               >
-                {year}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+                <Text
+                  style={[
+                    styles.pickerItemText,
+                    selectedYear === year && styles.pickerItemTextSelected,
+                  ]}
+                >
+                  {year}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
         <Text style={styles.pickerLabel}>Select Month (YYYY-MM):</Text>
         <TextInput
