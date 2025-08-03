@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import { paymentService } from '../../services/paymentService';
+// import { paymentService } from '../../services/paymentService';
 import type { Database } from '../../lib/database.types';
 
 type Payment = Database['public']['Tables']['payments']['Row'];
@@ -14,8 +14,8 @@ const RecentFeePayments: React.FC = () => {
     const fetchPayments = async () => {
       try {
         setLoading(true);
-        const data = await paymentService.getAll();
-        setPayments(data);
+        // const data = await payment.getAll();
+        // setPayments(data);
       } catch (err: any) {
         setError(err.message || 'Failed to fetch payments');
       } finally {

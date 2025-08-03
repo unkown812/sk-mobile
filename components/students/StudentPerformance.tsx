@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Picker } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import { performanceService } from '../../services/performanceService';
 import type { Database } from '../../lib/database.types';
 
@@ -122,7 +123,7 @@ const StudentPerformance: React.FC<StudentPerformanceProps> = ({ studentId }) =>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={selectedExamType}
-            onValueChange={(value) => setSelectedExamType(value)}
+            onValueChange={(value: string) => setSelectedExamType(value)}
             style={styles.picker}
           >
             {examTypes.map(type => (
