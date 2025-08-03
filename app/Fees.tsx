@@ -92,7 +92,7 @@ const Fees = () => {
 
   const fetchPayments = async () => {
     try {
-      const { data, error } = await supabase.from<Payment>('payments').select('*');
+      const { data, error } = await supabase.from('payments').select('*');
       if (error) throw error;
       setPayments(data || []);
     } catch (err: unknown) {
@@ -104,7 +104,7 @@ const Fees = () => {
     setLoading(true);
     setError(null);
     try {
-      const { data: studentsData, error: studentsError } = await supabase.from<Student>('students').select('*');
+      const { data: studentsData, error: studentsError } = await supabase.from('students').select('*');
       if (studentsError) throw studentsError;
       setStudents(studentsData || []);
       const summary = (studentsData || []).map((student) => {
@@ -185,7 +185,7 @@ const Fees = () => {
     setSubmitLoading(true);
     try {
       const { data: studentData, error: studentError } = await supabase
-        .from<Student>('students')
+        .from('students')
         .select('paid_fee, last_payment, name')
         .eq('id', selectedStudentId)
         .single();

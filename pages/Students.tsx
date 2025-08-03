@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { PlusCircle, Search, Download, Users, XCircle } from "lucide-react";
-import supabase from "../lib/supabase";
+import {supabase} from "../utils/supabase";
 import "../index.css";
 import FeeDueReminder from "../components/students/FeeDueReminder";
 import ReceiptModal from "../components/students/ReceiptModal";

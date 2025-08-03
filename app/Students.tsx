@@ -217,7 +217,7 @@ const Students = () => {
           year: 0,
           email: "",
           phone: "",
-          fee_status: "Unpaid",
+          fee_status: "Partial",
           total_fee: 0,
           paid_fee: 0,
           due_amount: 0,
