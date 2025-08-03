@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 interface Student {
   id?: number;
@@ -29,33 +30,89 @@ const FeeDueReminder: React.FC<FeeDueReminderProps> = ({
   if (!showFeeDueReminder) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 z-50 flex flex-col md:flex-row md:items-center md:justify-between">
-      <div>
-        <strong className="font-bold">Fee Due Reminder:</strong>
-        <ul className="list-disc list-inside">
-          {dueStudents.map(student => (
-            <li key={student.id}>
-              {student.name} - Due: ₹{student.due_amount} - Contact: {student.phone}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="mt-2 md:mt-0 flex space-x-2">
-        <button
-          className="btn-primary"
-          onClick={onSendWhatsAppMessages}
+    <View style={styles.container}>
+      <ScrollView horizontal style={styles.content}>
+        <Text style={styles.title}>Fee Due Reminder:</Text>
+        {dueStudents.map(student => (
+          <Text key={student.id} style={styles.studentItem}>
+            {student.name} - Due: ₹{student.due_amount} - Contact: {student.phone}
+          </Text>
+        ))}
+      </ScrollView>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.sendButton}
+          onPress={onSendWhatsAppMessages}
         >
-          Send WhatsApp Messages
-        </button>
-        <button
-          className="btn-secondary"
-          onClick={onDismiss}
+          <Text style={styles.sendButtonText}>Send WhatsApp Messages</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.dismissButton}
+          onPress={onDismiss}
         >
-          Dismiss
-        </button>
-      </div>
-    </div>
+          <Text style={styles.dismissButtonText}>Dismiss</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FEF9C3', // Tailwind yellow-100
+    borderColor: '#FACC15', // Tailwind yellow-400
+    borderWidth: 1,
+    padding: 16,
+    zIndex: 50,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  content: {
+    flex: 1,
+  },
+  title: {
+    fontWeight: 'bold',
+    color: '#A16207', // Tailwind yellow-700
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  studentItem: {
+    color: '#A16207', // Tailwind yellow-700
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginLeft: 16,
+  },
+  sendButton: {
+    backgroundColor: '#2563EB', // Tailwind primary
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginRight: 8,
+  },
+  sendButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  dismissButton: {
+    backgroundColor: '#E5E7EB', // Tailwind gray-200
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  dismissButtonText: {
+    color: '#374151', // Tailwind gray-700
+    fontSize: 12,
+    fontWeight: '500',
+  },
+});
 
 export default FeeDueReminder;

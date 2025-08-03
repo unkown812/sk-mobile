@@ -1,5 +1,7 @@
 import React from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { Student } from "../../types/types";
+
 const ReceiptModal: React.FC<{
   student: Student | null;
   onClose: () => void;
@@ -77,106 +79,228 @@ const ReceiptModal: React.FC<{
   };
 
   const handlePrint = () => {
-    window.print();
+    Alert.alert(
+      "Print Receipt",
+      "To print this receipt, please take a screenshot and print it manually.",
+      [{ text: "OK" }]
+    );
   };
 
   return (
-    <div className="fixed inset-0 bg-white p-10 w-full max-w-md max-h-[90vh] overflow-auto print:p-0 print:max-w-full print:max-h-full print:overflow-visible print:bg-white print:shadow-none print:rounded-none">
-      <div className="text-center mb-4">
-        <img
-          src="/src/assets/logo.png"
-          alt="SK Classes Logo"
-          className="mx-auto mb-2 w-20 h-20"
-        />
-        <h1 className="text-3xl font-bold mb-1">SK CLASSES</h1>
-        <hr className="border-t-4 border-black mb-4" />
-      </div>
-      <div className="text-left text-sm mb-4">
-        <div className="flex justify-between mb-1">
-          <span>
-            <strong>Receipt No. :</strong> {student.id ?? "N/A"}
-          </span>
-          <span>
-            <strong>Date:</strong> {new Date().toLocaleDateString()}
-          </span>
-        </div>
-        <div className="mb-1">
-          <strong>Received with thanks from :</strong> {student.name}
-        </div>
-        <div className="flex justify-between mb-1">
-          <span>
-            <strong>Standard:</strong> {student.category} {student.course}{" "}
-            {student.year ?? ""}
-          </span>
-          {/* <span><strong>Cheque No.:</strong> </span> */}
-        </div>
-        <div className="mb-1">
-          <strong>Installments:</strong>
-          <ul className="list-disc list-inside">
+    <View style={styles.modalContainer}>
+      <ScrollView style={styles.receiptContainer}>
+        <View style={styles.header}>
+          {/* Logo would go here if available */}
+          <Text style={styles.schoolName}>SK CLASSES</Text>
+          <View style={styles.divider} />
+        </View>
+        <View style={styles.receiptDetails}>
+          <View style={styles.row}>
+            <Text style={styles.detailText}>
+              <Text style={styles.bold}>Receipt No. :</Text> {student.id ?? "N/A"}
+            </Text>
+            <Text style={styles.detailText}>
+              <Text style={styles.bold}>Date:</Text> {new Date().toLocaleDateString()}
+            </Text>
+          </View>
+          <Text style={styles.detailText}>
+            <Text style={styles.bold}>Received with thanks from :</Text> {student.name}
+          </Text>
+          <View style={styles.row}>
+            <Text style={styles.detailText}>
+              <Text style={styles.bold}>Standard:</Text> {student.category} {student.course}{" "}
+              {student.year ?? ""}
+            </Text>
+          </View>
+          <View style={styles.installmentsContainer}>
+            <Text style={styles.bold}>Installments:</Text>
             {student.installment_amt &&
               student.installment_amt.map((amt, index) => (
-                <li key={index}>
+                <Text key={index} style={styles.installmentItem}>
                   Amount: ₹{amt} - Date:{" "}
                   {student.installment_dates && student.installment_dates[index]
                     ? new Date(
                         student.installment_dates[index]
                       ).toLocaleDateString()
                     : "N/A"}
-                </li>
+                </Text>
               ))}
-          </ul>
-        </div>
-        <div className="mb-1">
-          <strong>Cash / Cheque for Rs.:</strong> {student.paid_fee ?? 0}
-        </div>
-        <div className="mb-1">
-          <strong>Dated:</strong>{" "}
-          {student.last_payment
-            ? new Date(student.last_payment).toLocaleDateString()
-            : ""}
-        </div>
-        <div className="mb-1">
-          <strong>
-            Rupees in Words ({numberToWords(student.paid_fee ?? 0)})
-          </strong>
-        </div>
-      </div>
-      <div className="border border-black mb-4">
-        <div className="bg-gray-300 font-bold text-center border-b border-black py-1">
-          FEES
-        </div>
-        <div className="grid grid-cols-3 border-t border-black text-center text-sm">
-          <div className="border-r border-black py-1">Course Fees</div>
-          <div className="border-r border-black py-1">Installment</div>
-          <div className="py-1">Balance Amt.</div>
-        </div>
-        <div className="grid grid-cols-3 border-t border-black text-center text-sm">
-          <div className="border-r border-black py-2">{student.total_fee}</div>
-          <div className="border-r border-black py-2">{student.paid_fee}</div>
-          <div className="py-2">{student.due_amount}</div>
-        </div>
-      </div>
-      <div className="text-left text-xs mb-4">
-        <p>Attendance and punctuality in the class is compulsory.</p>
-        <p>
-          Tuition fees shall not be refunded or transferred to any other
-          students name under any circumstances.
-        </p>
-      </div>
-      <div className="flex justify-between text-sm font-semibold">
-        <div>For SK CLASSES</div>
-        <div>Auth. Sign</div>
-      </div>
-      <div className="mt-4 flex justify-center print:hidden">
-        <button className="btn-primary mr-4" onClick={handlePrint}>
-          Print Receipt
-        </button>
-        <button className="btn-secondary" onClick={onClose}>
-          Close
-        </button>
-      </div>
-    </div>
+          </View>
+          <Text style={styles.detailText}>
+            <Text style={styles.bold}>Cash / Cheque for Rs.:</Text> {student.paid_fee ?? 0}
+          </Text>
+          <Text style={styles.detailText}>
+            <Text style={styles.bold}>Dated:</Text>{" "}
+            {student.last_payment
+              ? new Date(student.last_payment).toLocaleDateString()
+              : ""}
+          </Text>
+          <Text style={styles.detailText}>
+            <Text style={styles.bold}>
+              Rupees in Words ({numberToWords(student.paid_fee ?? 0)})
+            </Text>
+          </Text>
+        </View>
+        <View style={styles.feesTable}>
+          <View style={styles.feesHeader}>
+            <Text style={styles.feesHeaderText}>FEES</Text>
+          </View>
+          <View style={styles.feesRow}>
+            <Text style={[styles.feesCell, styles.borderRight]}>Course Fees</Text>
+            <Text style={[styles.feesCell, styles.borderRight]}>Installment</Text>
+            <Text style={styles.feesCell}>Balance Amt.</Text>
+          </View>
+          <View style={styles.feesRow}>
+            <Text style={[styles.feesCell, styles.borderRight]}>{student.total_fee}</Text>
+            <Text style={[styles.feesCell, styles.borderRight]}>{student.paid_fee}</Text>
+            <Text style={styles.feesCell}>{student.due_amount}</Text>
+          </View>
+        </View>
+        <View style={styles.termsContainer}>
+          <Text style={styles.termsText}>Attendance and punctuality in the class is compulsory.</Text>
+          <Text style={styles.termsText}>
+            Tuition fees shall not be refunded or transferred to any other
+            students name under any circumstances.
+          </Text>
+        </View>
+        <View style={styles.signatureContainer}>
+          <Text style={styles.signatureText}>For SK CLASSES</Text>
+          <Text style={styles.signatureText}>Auth. Sign</Text>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.printButton} onPress={handlePrint}>
+            <Text style={styles.buttonText}>Print Receipt</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={styles.buttonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+  },
+  receiptContainer: {
+    flex: 1,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  schoolName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  divider: {
+    height: 4,
+    backgroundColor: '#000000',
+    width: '100%',
+    marginBottom: 16,
+  },
+  receiptDetails: {
+    marginBottom: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  detailText: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  installmentsContainer: {
+    marginBottom: 8,
+  },
+  installmentItem: {
+    fontSize: 12,
+    marginLeft: 16,
+    marginBottom: 2,
+  },
+  feesTable: {
+    borderWidth: 1,
+    borderColor: '#000000',
+    marginBottom: 16,
+  },
+  feesHeader: {
+    backgroundColor: '#D1D5DB', // Tailwind gray-300
+    fontWeight: 'bold',
+    alignItems: 'center',
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#000000',
+  },
+  feesHeaderText: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 12,
+  },
+  feesRow: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#000000',
+  },
+  feesCell: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 12,
+    paddingVertical: 8,
+  },
+  borderRight: {
+    borderRightWidth: 1,
+    borderRightColor: '#000000',
+  },
+  termsContainer: {
+    marginBottom: 16,
+  },
+  termsText: {
+    fontSize: 10,
+    marginBottom: 4,
+  },
+  signatureContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  signatureText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  printButton: {
+    backgroundColor: '#2563EB', // Tailwind primary
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginRight: 16,
+  },
+  closeButton: {
+    backgroundColor: '#E5E7EB', // Tailwind gray-200
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+});
 
 export default ReceiptModal;

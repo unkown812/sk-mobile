@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 const PerformanceWidget: React.FC = () => {
   const performanceData = [
@@ -9,25 +10,62 @@ const PerformanceWidget: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-4">
+    <View style={styles.container}>
       {performanceData.map((item, index) => (
-        <div key={index} className="flex justify-between items-center p-3 border rounded-lg hover:bg-gray-50">
-          <div>
-            <h3 className="font-medium">{item.course}</h3>
-            <p className="text-sm text-gray-500">Avg. Score: {item.avgScore}%</p>
-          </div>
-          <div className="text-sm text-green-600">
-            +{item.improvement}% improvement
-          </div>
-        </div>
+        <View key={index} style={styles.itemContainer}>
+          <View>
+            <Text style={styles.courseName}>{item.course}</Text>
+            <Text style={styles.avgScore}>Avg. Score: {item.avgScore}%</Text>
+          </View>
+          <Text style={styles.improvement}>+{item.improvement}% improvement</Text>
+        </View>
       ))}
-      <div className="mt-2">
-        <button className="text-sm text-primary font-medium hover:underline">
-          View detailed report →
-        </button>
-      </div>
-    </div>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity>
+          <Text style={styles.buttonText}>View detailed report →</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 8,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB', // Tailwind gray-200
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  courseName: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#111827', // Tailwind gray-900
+  },
+  avgScore: {
+    fontSize: 12,
+    color: '#6B7280', // Tailwind gray-500
+    marginTop: 4,
+  },
+  improvement: {
+    fontSize: 12,
+    color: '#16A34A', // Tailwind green-600
+  },
+  buttonContainer: {
+    marginTop: 8,
+  },
+  buttonText: {
+    fontSize: 12,
+    color: '#2563EB', // Tailwind primary
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+});
 
 export default PerformanceWidget;

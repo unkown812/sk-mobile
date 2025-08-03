@@ -1,19 +1,27 @@
 import React, { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
+import { useNavigation } from '@react-navigation/native';
+import { ReactElement, useEffect } from 'react';
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  children: ReactElement;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated } = useUser();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigation.navigate('Login' as never);
+    }
+  }, [isAuthenticated, navigation]);
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return null;
   }
 
-  return <>{children}</>;
+  return children;
 };
 
 export default ProtectedRoute;

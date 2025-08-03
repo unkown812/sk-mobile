@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
 import supabase from '../../lib/supabase';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface Student {
   id?: number;
@@ -42,19 +44,11 @@ const DueDateReminder: React.FC = () => {
             setDueTodayStudents(studentsDueToday);
             setShowReminder(true);
 
-            if (Notification.permission === 'granted') {
-              new Notification('Installment Due Date Reminder', {
-                body: `You have ${studentsDueToday.length} student(s) with installment due today.`,
-              });
-            } else if (Notification.permission !== 'denied') {
-              Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                  new Notification('Installment Due Date Reminder', {
-                    body: `You have ${studentsDueToday.length} student(s) with installment due today.`,
-                  });
-                }
-              });
-            }
+            // Show alert notification
+            Alert.alert(
+              'Installment Due Date Reminder',
+              `You have ${studentsDueToday.length} student(s) with installment due today.`
+            );
           } else {
             setDueTodayStudents([]);
             setShowReminder(false);
@@ -76,33 +70,62 @@ const DueDateReminder: React.FC = () => {
   }
 
   return (
-    <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-4" role="alert">
-      <strong className="font-bold">Installment Due Date Reminder!</strong>
-      {/* <span className="block sm:inline"> The following students have installment(s) due today ({new Date().toISOString().split('T')[0]}):</span> */}
-      <ul className="list-disc list-inside mt-2">
-        {dueTodayStudents.map(({student, dueDates}) => (
-          // <li key={student.id}>
-          //   {student.name} - Due Date: {dueDates.join(', ')}{' '} <br/>
-          //   <a href={`tel:+${student.phone}`}>{student.phone}</a>
-          // </li>
-          <li key={student.id} className='space-between'>
-            {student.name} - 
-            <a href={`tel:+${student.phone}`}>{student.phone}</a>
-          </li>
-        ))}
-      </ul>
-      <button
-        onClick={() => setShowReminder(false)}
-        className="absolute top-0 bottom-0 right-0 px-4 py-4"
-        aria-label="Close"
+    <View style={styles.container} role="alert">
+      <Text style={styles.title}>Installment Due Date Reminder!</Text>
+      {dueTodayStudents.map(({student}) => (
+        <View key={student.id} style={styles.studentItem}>
+          <Text style={styles.studentName}>{student.name} - </Text>
+          <TouchableOpacity onPress={() => Linking.openURL(`tel:+${student.phone}`)}>
+            <Text style={styles.phoneLink}>{student.phone}</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+      <TouchableOpacity
+        onPress={() => setShowReminder(false)}
+        style={styles.closeButton}
+        accessibilityLabel="Close"
       >
-        <svg className="fill-current h-6 w-6 text-yellow-700" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-          <title>Close</title>
-          <path d="M14.348 5.652a1 1 0 00-1.414 0L10 8.586 7.066 5.652a1 1 0 10-1.414 1.414L8.586 10l-2.934 2.934a1 1 0 101.414 1.414L10 11.414l2.934 2.934a1 1 0 001.414-1.414L11.414 10l2.934-2.934a1 1 0 000-1.414z"/>
-        </svg>
-      </button>
-    </div>
+        <MaterialIcons name="close" size={24} color="#CA8A04" />
+      </TouchableOpacity>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#FEF9C3', // Tailwind yellow-100
+    borderColor: '#FACC15', // Tailwind yellow-400
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 16,
+    marginBottom: 16,
+    position: 'relative',
+  },
+  title: {
+    fontWeight: 'bold',
+    color: '#A16207', // Tailwind yellow-700
+    fontSize: 16,
+  },
+  studentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  studentName: {
+    color: '#A16207', // Tailwind yellow-700
+    fontSize: 14,
+  },
+  phoneLink: {
+    color: '#3B82F6', // A blue color for links
+    fontSize: 14,
+    textDecorationLine: 'underline',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    padding: 16,
+  },
+});
 
 export default DueDateReminder;

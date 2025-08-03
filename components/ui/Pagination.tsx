@@ -1,5 +1,6 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface PaginationProps {
   currentPage: number;
@@ -15,66 +16,108 @@ const Pagination: React.FC<PaginationProps> = ({
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 sm:px-6">
-      <div className="flex flex-1 justify-between sm:hidden">
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
+    <View style={styles.container}>
+      <View style={styles.navigation}>
+        <TouchableOpacity
+          onPress={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          style={[styles.button, currentPage === 1 && styles.disabledButton]}
         >
-          Previous
-        </button>
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
+          <MaterialIcons name="chevron-left" size={24} color={currentPage === 1 ? '#9CA3AF' : '#374151'} />
+          <Text style={[styles.buttonText, currentPage === 1 && styles.disabledText]}>Previous</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          style={[styles.button, currentPage === totalPages && styles.disabledButton]}
         >
-          Next
-        </button>
-      </div>
-      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm text-gray-700">
-            Page <span className="font-medium">{currentPage}</span> of{' '}
-            <span className="font-medium">{totalPages}</span>
-          </p>
-        </div>
-        <div>
-          <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-            <button
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-            >
-              <span className="sr-only">Previous</span>
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            {pages.map((page) => (
-              <button
-                key={page}
-                onClick={() => onPageChange(page)}
-                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
-                  page === currentPage
-                    ? 'z-10 bg-primary text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
-                    : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-            >
-              <span className="sr-only">Next</span>
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </nav>
-        </div>
-      </div>
-    </div>
+          <Text style={[styles.buttonText, currentPage === totalPages && styles.disabledText]}>Next</Text>
+          <MaterialIcons name="chevron-right" size={24} color={currentPage === totalPages ? '#9CA3AF' : '#374151'} />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.pageInfo}>
+        <Text style={styles.pageText}>
+          Page <Text style={styles.pageNumber}>{currentPage}</Text> of <Text style={styles.pageNumber}>{totalPages}</Text>
+        </Text>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pageList}>
+        {pages.map((page) => (
+          <TouchableOpacity
+            key={page}
+            onPress={() => onPageChange(page)}
+            style={[styles.pageButton, page === currentPage && styles.activePageButton]}
+          >
+            <Text style={[styles.pageButtonText, page === currentPage && styles.activePageButtonText]}>{page}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+  },
+  navigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  buttonText: {
+    fontSize: 14,
+    color: '#374151',
+    marginHorizontal: 4,
+  },
+  disabledText: {
+    color: '#9CA3AF',
+  },
+  pageInfo: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  pageText: {
+    fontSize: 14,
+    color: '#374151',
+  },
+  pageNumber: {
+    fontWeight: '600',
+  },
+  pageList: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  pageButton: {
+    marginHorizontal: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: '#F3F4F6',
+  },
+  activePageButton: {
+    backgroundColor: '#2563EB',
+  },
+  pageButtonText: {
+    fontSize: 14,
+    color: '#374151',
+  },
+  activePageButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+});
 
 export default Pagination;

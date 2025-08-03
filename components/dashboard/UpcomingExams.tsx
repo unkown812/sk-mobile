@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar } from 'lucide-react';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import supabase from '../../lib/supabase';
 
 interface Exam {
@@ -34,21 +35,12 @@ const UpcomingExams: React.FC = () => {
         const examToday = examsData.find((exam) => exam.date === todayStr) || null;
         setTodayExam(examToday);
 
-        // Push notification if exam today
-        if (examToday && "Notification" in window) {
-          if (Notification.permission === "granted") {
-            new Notification("Exam Reminder", {
-              body: `You have an exam scheduled today: ${examToday.name}`,
-            });
-          } else if (Notification.permission !== "denied") {
-            Notification.requestPermission().then(permission => {
-              if (permission === "granted") {
-                new Notification("Exam Reminder", {
-                  body: `You have an exam scheduled today: ${examToday.name}`,
-                });
-              }
-            });
-          }
+        // Show alert notification if exam today
+        if (examToday) {
+          Alert.alert(
+            "Exam Reminder",
+            `You have an exam scheduled today: ${examToday.name}`
+          );
         }
       } catch (err) {
         console.error('Unexpected error fetching exams:', err);
@@ -59,37 +51,117 @@ const UpcomingExams: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-4 overflow-y-scroll">
+    <ScrollView style={styles.container}>
       {todayExam && (
-        <div className="p-3 mb-4 border border-yellow-400 bg-yellow-50 rounded text-yellow-800 font-semibold">
-          Reminder: You have an exam scheduled today: {todayExam.name}
-        </div>
+        <View style={styles.reminderContainer}>
+          <Text style={styles.reminderText}>
+            Reminder: You have an exam scheduled today: {todayExam.name}
+          </Text>
+        </View>
       )}
       {exams.map((exam) => (
-        <div key={exam.id} className="flex space-x-4 p-3 border rounded-lg hover:bg-gray-50">
-          <div className="flex-shrink-0 bg-blue-100 text-blue-800 rounded-lg p-3 text-center">
-            <Calendar className="h-5 w-5 mx-auto" />
-            <div className="text-xs mt-1 font-medium">
+        <View key={exam.id} style={styles.examContainer}>
+          <View style={styles.calendarContainer}>
+            <MaterialIcons name="calendar-today" size={20} color="#2563EB" />
+            <Text style={styles.calendarDate}>
               {new Date(exam.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-            </div>
-          </div>
-          <div>
-            <h3 className="font-medium">{exam.name}</h3>
-            <div className="flex flex-wrap gap-3 mt-1">
-              {exam.course && <span className="text-blue-600">{exam.course}</span>}
-              {exam.category && <span className="text-green-700">{exam.category}</span>}
-              {exam.year !== undefined && <span className="text-orange-600">{exam.year}th</span>}
-            </div>
-          </div>
-        </div>
+            </Text>
+          </View>
+          <View style={styles.examDetails}>
+            <Text style={styles.examName}>{exam.name}</Text>
+            <View style={styles.tagsContainer}>
+              {exam.course && <Text style={styles.courseTag}>{exam.course}</Text>}
+              {exam.category && <Text style={styles.categoryTag}>{exam.category}</Text>}
+              {exam.year !== undefined && <Text style={styles.yearTag}>{exam.year}th</Text>}
+            </View>
+          </View>
+        </View>
       ))}
-      <div className="mt-2">
-        <button className="text-sm text-primary font-medium hover:underline">
-          View all exams →
-        </button>
-      </div>
-    </div>
+      <View style={styles.buttonContainer}>
+        <Text style={styles.buttonText}>View all exams →</Text>
+      </View>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 8,
+  },
+  reminderContainer: {
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#FACC15', // Tailwind yellow-400
+    backgroundColor: '#FEFCE8', // Tailwind yellow-50
+    borderRadius: 6,
+  },
+  reminderText: {
+    color: '#854D0E', // Tailwind yellow-800
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  examContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB', // Tailwind gray-200
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  calendarContainer: {
+    backgroundColor: '#DBEAFE', // Tailwind blue-100
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  calendarDate: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#1E40AF', // Tailwind blue-800
+    marginTop: 4,
+  },
+  examDetails: {
+    flex: 1,
+  },
+  examName: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#111827', // Tailwind gray-900
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 4,
+  },
+  courseTag: {
+    fontSize: 12,
+    color: '#2563EB', // Tailwind blue-600
+    marginRight: 8,
+  },
+  categoryTag: {
+    fontSize: 12,
+    color: '#047857', // Tailwind green-700
+    marginRight: 8,
+  },
+  yearTag: {
+    fontSize: 12,
+    color: '#EA580C', // Tailwind orange-600
+    marginRight: 8,
+  },
+  buttonContainer: {
+    marginTop: 8,
+    padding: 8,
+  },
+  buttonText: {
+    fontSize: 12,
+    color: '#2563EB', // Tailwind primary
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+});
 
 export default UpcomingExams;

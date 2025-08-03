@@ -12,27 +12,35 @@ import {
   ScrollView,
 } from "react-native";
 import { supabase } from "@/utils/supabase";
+import FeeDueReminder from '@/components/students/FeeDueReminder';
+import ReceiptModal from '@/components/students/ReceiptModal';
+import StudentAttendance from '@/components/students/StudentAttendance';
+import StudentFeeHistory from '@/components/students/StudentFeeHistory';
 
 interface Student {
-  id: number;
+  id?: number;
   name: string;
   category: string;
   course: string;
   year: number;
+  semester: number | null;
   email: string;
-  phone?: string;
-  fee_status?: string;
-  total_fee?: number;
-  paid_fee?: number;
-  due_amount?: number;
-  installments?: number;
-  enrollment_date?: string;
-  semester?: number | null;
-  subjects_enrolled?: string[];
-  due_dates?: string[];
-  installment_amt?: number[];
+  phone: string;
+  enrollment_date: string;
+  created_at: string;
+  fee_status: string;
+  total_fee: number | null;
+  paid_fee: number | null;
+  due_amount: number | null;
+  last_payment: string;
+  birthday: string;
+  installment_amt: number[];
+  installments: number | null;
   installment_dates?: string[];
   installment_descriptions?: string[];
+  enrollment_year: number[];
+  subjects_enrolled: string[];
+  due_dates?: string[];
 }
 
 const studentCategories = [
@@ -69,26 +77,36 @@ const Students = () => {
   const [adding, setAdding] = useState<boolean>(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [newStudent, setNewStudent] = useState<Student>({
-    id: 0,
+    id: undefined,
     name: "",
     category: "",
     course: "",
     year: 0,
+    semester: null,
     email: "",
     phone: "",
-    fee_status: "Unpaid",
-    total_fee: 0,
-    paid_fee: 0,
-    due_amount: 0,
-    installments: 1,
     enrollment_date: new Date().toISOString().split("T")[0],
-    semester: null,
-    subjects_enrolled: [],
-    due_dates: [],
+    created_at: new Date().toISOString(),
+    fee_status: "Unpaid",
+    total_fee: null,
+    paid_fee: null,
+    due_amount: null,
+    last_payment: "",
+    birthday: "",
     installment_amt: [],
+    installments: null,
     installment_dates: [],
     installment_descriptions: [],
+    enrollment_year: [],
+    subjects_enrolled: [],
+    due_dates: [],
   });
+  const [showFeeDueReminder, setShowFeeDueReminder] = useState<boolean>(true);
+  const [dueStudents, setDueStudents] = useState<Student[]>([]);
+  const [receiptStudent, setReceiptStudent] = useState<Student | null>(null);
+  const [showReceiptModal, setShowReceiptModal] = useState<boolean>(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'list' | 'details'>('list');
 
   useEffect(() => {
     switch (selectedCategory) {
@@ -126,6 +144,12 @@ const Students = () => {
         due_amount: (student.total_fee || 0) - (student.paid_fee || 0),
       }));
       setStudents(studentsWithDue);
+      
+      // Set due students for FeeDueReminder
+      const dueStudentsList = studentsWithDue.filter(student => 
+        student.due_amount && student.due_amount > 0
+      );
+      setDueStudents(dueStudentsList);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Unknown error");
@@ -210,25 +234,29 @@ const Students = () => {
       } else {
         Alert.alert("Success", "Student added successfully");
         setNewStudent({
-          id: 0,
+          id: undefined,
           name: "",
           category: "",
           course: "",
           year: 0,
+          semester: null,
           email: "",
           phone: "",
-          fee_status: "Partial",
-          total_fee: 0,
-          paid_fee: 0,
-          due_amount: 0,
-          installments: 1,
           enrollment_date: new Date().toISOString().split("T")[0],
-          semester: null,
-          subjects_enrolled: [],
-          due_dates: [],
+          created_at: new Date().toISOString(),
+          fee_status: "Unpaid",
+          total_fee: null,
+          paid_fee: null,
+          due_amount: null,
+          last_payment: "",
+          birthday: "",
           installment_amt: [],
+          installments: null,
           installment_dates: [],
           installment_descriptions: [],
+          enrollment_year: [],
+          subjects_enrolled: [],
+          due_dates: [],
         });
         fetchStudents();
       }
@@ -240,124 +268,170 @@ const Students = () => {
   };
 
   const renderStudentItem = ({ item }: { item: Student }) => (
-    <TouchableOpacity
-      style={styles.studentItem}
-      onPress={() => openEditModal(item)}
-    >
-      <View style={styles.studentRow}>
+    <View style={styles.studentItem}>
+      <TouchableOpacity
+        style={styles.studentRow}
+        onPress={() => openEditModal(item)}
+      >
         <Text style={styles.studentName}>{item.name}</Text>
         <Text style={styles.studentInfo}>{item.category}</Text>
         <Text style={styles.studentInfo}>{item.course}</Text>
         <Text style={styles.studentInfo}>{item.year}</Text>
         <Text style={styles.studentInfo}>{item.email}</Text>
         <Text style={styles.studentInfo}>{item.due_amount?.toFixed(2)}</Text>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      {item.id && (
+        <TouchableOpacity
+          style={styles.viewDetailsButton}
+          onPress={() => {
+            setSelectedStudentId(item.id!.toString());
+            setActiveTab('details');
+          }}
+        >
+          <Text style={styles.viewDetailsText}>View Details</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
+
+  const renderStudentDetails = () => {
+    if (!selectedStudentId) return null;
+    
+    return (
+      <View style={styles.detailsContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => setActiveTab('list')}
+        >
+          <Text style={styles.backButtonText}>← Back to Student List</Text>
+        </TouchableOpacity>
+        
+        <StudentAttendance studentId={selectedStudentId} />
+        <StudentFeeHistory studentId={selectedStudentId} />
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Students</Text>
-      <View style={styles.filters}>
-        <TextInput
-          style={styles.input}
-          placeholder="Search by name, id, or email"
-          value={searchTerm}
-          onChangeText={setSearchTerm}
-        />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterScroll}
-        >
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              selectedCategory === "All" && styles.filterButtonActive,
-            ]}
-            onPress={() => setSelectedCategory("All")}
-          >
-            <Text style={styles.filterButtonText}>All</Text>
-          </TouchableOpacity>
-          {studentCategories.map((category) => (
-            <TouchableOpacity
-              key={category}
-              style={[
-                styles.filterButton,
-                selectedCategory === category && styles.filterButtonActive,
-              ]}
-              onPress={() => setSelectedCategory(category)}
+      
+      {/* Fee Due Reminder */}
+      <FeeDueReminder
+        showFeeDueReminder={showFeeDueReminder && dueStudents.length > 0}
+        dueStudents={dueStudents}
+        onDismiss={() => setShowFeeDueReminder(false)}
+        onSendWhatsAppMessages={() => {
+          Alert.alert('Info', 'WhatsApp messages would be sent to due students.');
+        }}
+      />
+      
+      {activeTab === 'list' ? (
+        <>
+          <View style={styles.filters}>
+            <TextInput
+              style={styles.input}
+              placeholder="Search by name, id, or email"
+              value={searchTerm}
+              onChangeText={setSearchTerm}
+            />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.filterScroll}
             >
-              <Text style={styles.filterButtonText}>{category}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterScroll}
-        >
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              selectedCourse === "All" && styles.filterButtonActive,
-            ]}
-            onPress={() => setSelectedCourse("All")}
-          >
-            <Text style={styles.filterButtonText}>All</Text>
-          </TouchableOpacity>
-          {studentCourses.map((course) => (
-            <TouchableOpacity
-              key={course}
-              style={[
-                styles.filterButton,
-                selectedCourse === course && styles.filterButtonActive,
-              ]}
-              onPress={() => setSelectedCourse(course)}
+              <TouchableOpacity
+                style={[
+                  styles.filterButton,
+                  selectedCategory === "All" && styles.filterButtonActive,
+                ]}
+                onPress={() => setSelectedCategory("All")}
+              >
+                <Text style={styles.filterButtonText}>All</Text>
+              </TouchableOpacity>
+              {studentCategories.map((category) => (
+                <TouchableOpacity
+                  key={category}
+                  style={[
+                    styles.filterButton,
+                    selectedCategory === category && styles.filterButtonActive,
+                  ]}
+                  onPress={() => setSelectedCategory(category)}
+                >
+                  <Text style={styles.filterButtonText}>{category}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.filterScroll}
             >
-              <Text style={styles.filterButtonText}>{course}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterScroll}
-        >
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              selectedYear === 0 && styles.filterButtonActive,
-            ]}
-            onPress={() => setSelectedYear(0)}
-          >
-            <Text style={styles.filterButtonText}>All</Text>
-          </TouchableOpacity>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((year) => (
-            <TouchableOpacity
-              key={year}
-              style={[
-                styles.filterButton,
-                selectedYear === year && styles.filterButtonActive,
-              ]}
-              onPress={() => setSelectedYear(year)}
+              <TouchableOpacity
+                style={[
+                  styles.filterButton,
+                  selectedCourse === "All" && styles.filterButtonActive,
+                ]}
+                onPress={() => setSelectedCourse("All")}
+              >
+                <Text style={styles.filterButtonText}>All</Text>
+              </TouchableOpacity>
+              {studentCourses.map((course) => (
+                <TouchableOpacity
+                  key={course}
+                  style={[
+                    styles.filterButton,
+                    selectedCourse === course && styles.filterButtonActive,
+                  ]}
+                  onPress={() => setSelectedCourse(course)}
+                >
+                  <Text style={styles.filterButtonText}>{course}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.filterScroll}
             >
-              <Text style={styles.filterButtonText}>{year}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-      {loading ? (
-        <ActivityIndicator size="large" color="#007AFF" />
-      ) : error ? (
-        <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity
+                style={[
+                  styles.filterButton,
+                  selectedYear === 0 && styles.filterButtonActive,
+                ]}
+                onPress={() => setSelectedYear(0)}
+              >
+                <Text style={styles.filterButtonText}>All</Text>
+              </TouchableOpacity>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((year) => (
+                <TouchableOpacity
+                  key={year}
+                  style={[
+                    styles.filterButton,
+                    selectedYear === year && styles.filterButtonActive,
+                  ]}
+                  onPress={() => setSelectedYear(year)}
+                >
+                  <Text style={styles.filterButtonText}>{year}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+          {loading ? (
+            <ActivityIndicator size="large" color="#007AFF" />
+          ) : error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : (
+            <FlatList
+              data={filteredStudents}
+              keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()}
+              renderItem={renderStudentItem}
+              contentContainerStyle={styles.listContent}
+            />
+          )}
+        </>
       ) : (
-        <FlatList
-          data={filteredStudents}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderStudentItem}
-          contentContainerStyle={styles.listContent}
-        />
+        renderStudentDetails()
       )}
 
       {/* Edit Student Modal */}
@@ -469,6 +543,18 @@ const Students = () => {
           )}
         </View>
       </Modal>
+      
+      {/* Receipt Modal */}
+      <Modal
+        visible={showReceiptModal}
+        animationType="slide"
+        onRequestClose={() => setShowReceiptModal(false)}
+      >
+        <ReceiptModal 
+          student={receiptStudent} 
+          onClose={() => setShowReceiptModal(false)} 
+        />
+      </Modal>
     </View>
   );
 };
@@ -572,6 +658,30 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
+    fontWeight: "600",
+  },
+  viewDetailsButton: {
+    backgroundColor: "#007AFF",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  viewDetailsText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  detailsContainer: {
+    flex: 1,
+  },
+  backButton: {
+    marginBottom: 16,
+  },
+  backButtonText: {
+    color: "#007AFF",
+    fontSize: 16,
     fontWeight: "600",
   },
 });

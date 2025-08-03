@@ -8,6 +8,11 @@ import {
   Alert,
 } from 'react-native';
 import { supabase } from '@/utils/supabase';
+import BirthdayReminder from '@/components/dashboard/BirthdayReminder';
+import DueDateReminder from '@/components/dashboard/DueDateReminder';
+import PerformanceWidget from '@/components/dashboard/PerformanceWidget';
+import RecentFeePayments from '@/components/dashboard/RecentFeePayments';
+import UpcomingExams from '@/components/dashboard/UpcomingExams';
 
 const Dashboard = () => {
   const [totalStudents, setTotalStudents] = useState<number | null>(null);
@@ -76,25 +81,25 @@ const Dashboard = () => {
         </View>
       </View>
 
-      {/* Placeholder for other dashboard components */}
+      {/* Dashboard Components */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Recent Fee Payments</Text>
-        <Text style={styles.placeholderText}>[Component not implemented]</Text>
+        <RecentFeePayments />
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Upcoming Exams</Text>
-        <Text style={styles.placeholderText}>[Component not implemented]</Text>
+        <UpcomingExams />
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Due Date Reminders</Text>
-        <Text style={styles.placeholderText}>[Component not implemented]</Text>
+        <DueDateReminder />
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Birthday Reminders</Text>
-        <Text style={styles.placeholderText}>[Component not implemented]</Text>
+        <BirthdayReminder />
       </View>
     </ScrollView>
   );

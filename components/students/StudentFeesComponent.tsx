@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { createClient } from '@supabase/supabase-js';
 
 // Create Supabase client (typically in a separate file like supabaseClient.ts)
@@ -90,53 +91,125 @@ function StudentFeesComponent() {
   };
 
   return (
-    <div>
-      <h2>Student Fees Management</h2>
+    <View style={styles.container}>
+      <Text style={styles.title}>Student Fees Management</Text>
 
       {/* Student ID Input */}
-      <input
-        type="text"
+      <TextInput
+        style={styles.input}
         value={studentId}
-        onChange={(e) => setStudentId(e.target.value)}
+        onChangeText={setStudentId}
         placeholder="Enter Student ID"
+        placeholderTextColor="#9CA3AF"
       />
 
       {/* Fetch Fees Button */}
-      <button onClick={fetchStudentFees}>
-        Fetch Student Fees
-      </button>
+      <TouchableOpacity style={styles.button} onPress={fetchStudentFees}>
+        <Text style={styles.buttonText}>Fetch Student Fees</Text>
+      </TouchableOpacity>
 
       {/* Add Installment Section */}
-      <div>
-        <input
-          type="number"
+      <View style={styles.installmentContainer}>
+        <TextInput
+          style={styles.input}
           value={installmentAmount}
-          onChange={(e) => setInstallmentAmount(e.target.value)}
+          onChangeText={setInstallmentAmount}
           placeholder="Installment Amount"
+          placeholderTextColor="#9CA3AF"
+          keyboardType="numeric"
         />
-        <button onClick={addInstallment}>
-          Add Installment
-        </button>
-      </div>
+        <TouchableOpacity style={styles.button} onPress={addInstallment}>
+          <Text style={styles.buttonText}>Add Installment</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Display Fees */}
       {studentFees && (
-        <div>
-          <h3>Student Fees Details</h3>
-          <p>Total Fee: {studentFees.total_fee}</p>
-          <p>Paid Fee: {studentFees.paid_fee}</p>
-          <p>Installments: {studentFees.installment_amt?.join(', ')}</p>
-        </div>
+        <View style={styles.feesContainer}>
+          <Text style={styles.sectionTitle}>Student Fees Details</Text>
+          <Text style={styles.feeText}>Total Fee: {studentFees.total_fee}</Text>
+          <Text style={styles.feeText}>Paid Fee: {studentFees.paid_fee}</Text>
+          <Text style={styles.feeText}>Installments: {studentFees.installment_amt?.join(', ')}</Text>
+        </View>
       )}
 
       {/* Error Handling */}
       {error && (
-        <div style={{ color: 'red' }}>
-          Error: {error}
-        </div>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error: {error}</Text>
+        </View>
       )}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#111827', // Tailwind gray-900
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB', // Tailwind gray-300
+    borderRadius: 6,
+    padding: 12,
+    fontSize: 16,
+    color: '#111827', // Tailwind gray-900
+    marginBottom: 16,
+  },
+  button: {
+    backgroundColor: '#2563EB', // Tailwind primary
+    borderRadius: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  installmentContainer: {
+    marginBottom: 24,
+  },
+  feesContainer: {
+    padding: 16,
+    backgroundColor: '#F9FAFB', // Tailwind gray-50
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB', // Tailwind gray-200
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111827', // Tailwind gray-900
+    marginBottom: 16,
+  },
+  feeText: {
+    fontSize: 16,
+    color: '#374151', // Tailwind gray-700
+    marginBottom: 8,
+  },
+  errorContainer: {
+    padding: 16,
+    backgroundColor: '#FEF2F2', // Tailwind red-50
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FECACA', // Tailwind red-300
+  },
+  errorText: {
+    color: '#EF4444', // Tailwind red-500
+    fontSize: 16,
+  },
+});
 
 export default StudentFeesComponent;

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import supabase from '../../lib/supabase';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface Student {
   id?: number;
@@ -36,20 +38,11 @@ const BirthdayReminder: React.FC = () => {
           if (birthdayStudents.length > 0) {
             setBirthdayTodayStudents(birthdayStudents);
             setShowReminder(true);
-            // Show browser notification
-            if (Notification.permission === 'granted') {
-              new Notification('Birthday Reminder', {
-                body: `You have ${birthdayStudents.length} student(s) with birthday today.`,
-              });
-            } else if (Notification.permission !== 'denied') {
-              Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                  new Notification('Birthday Reminder', {
-                    body: `You have ${birthdayStudents.length} student(s) with birthday today.`,
-                  });
-                }
-              });
-            }
+            // Show alert notification
+            Alert.alert(
+              'Birthday Reminder',
+              `You have ${birthdayStudents.length} student(s) with birthday today.`
+            );
           } else {
             setBirthdayTodayStudents([]);
             setShowReminder(false);
@@ -71,26 +64,59 @@ const BirthdayReminder: React.FC = () => {
   }
 
   return (
-    <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-4" role="alert">
-      <strong className="font-bold">Birthday Reminder!</strong>
-      <span className="block sm:inline"> The following students have birthday today ({new Date().toLocaleDateString()}):</span>
-      <ul className="list-disc list-inside mt-2">
-        {birthdayTodayStudents.map(student => (
-          <li key={student.id}>{student.name}</li>
-        ))}
-      </ul>
-      <button
-        onClick={() => setShowReminder(false)}
-        className="absolute top-0 bottom-0 right-0 px-4 py-3"
-        aria-label="Close"
+    <View style={styles.container} role="alert">
+      <Text style={styles.title}>Birthday Reminder!</Text>
+      <Text style={styles.message}>
+        The following students have birthday today ({new Date().toLocaleDateString()}):
+      </Text>
+      {birthdayTodayStudents.map(student => (
+        <Text key={student.id} style={styles.studentName}>
+          • {student.name}
+        </Text>
+      ))}
+      <TouchableOpacity
+        onPress={() => setShowReminder(false)}
+        style={styles.closeButton}
+        accessibilityLabel="Close"
       >
-        <svg className="fill-current h-6 w-6 text-blue-700" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-          <title>Close</title>
-          <path d="M14.348 5.652a1 1 0 00-1.414 0L10 8.586 7.066 5.652a1 1 0 10-1.414 1.414L8.586 10l-2.934 2.934a1 1 0 101.414 1.414L10 11.414l2.934 2.934a1 1 0 001.414-1.414L11.414 10l2.934-2.934a1 1 0 000-1.414z"/>
-        </svg>
-      </button>
-    </div>
+        <MaterialIcons name="close" size={24} color="#2563EB" />
+      </TouchableOpacity>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#DBEAFE', // Tailwind blue-100
+    borderColor: '#60A5FA', // Tailwind blue-400
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 16,
+    marginBottom: 16,
+    position: 'relative',
+  },
+  title: {
+    fontWeight: 'bold',
+    color: '#1D4ED8', // Tailwind blue-700
+    fontSize: 16,
+  },
+  message: {
+    color: '#1D4ED8', // Tailwind blue-700
+    fontSize: 14,
+    marginTop: 4,
+  },
+  studentName: {
+    color: '#1D4ED8', // Tailwind blue-700
+    fontSize: 14,
+    marginTop: 8,
+    marginLeft: 16,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    padding: 16,
+  },
+});
 
 export default BirthdayReminder;
