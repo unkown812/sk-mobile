@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Picker, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { MaterialIcons } from '@expo/vector-icons';
 import { attendanceService } from '../../services/attendanceService';
 import type { Database } from '../../lib/database.types';
@@ -142,7 +143,7 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId }) => {
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={selectedMonth}
-            onValueChange={(value) => setSelectedMonth(value)}
+            onValueChange={(value: string) => setSelectedMonth(value)}
             style={styles.picker}
           >
             {months.map(month => (
@@ -155,7 +156,7 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId }) => {
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={selectedSubject}
-            onValueChange={(value) => setSelectedSubject(value)}
+            onValueChange={(value: string) => setSelectedSubject(value)}
             style={styles.picker}
           >
             {subjects.map(subject => (
@@ -203,6 +204,7 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId }) => {
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderText, styles.tableCell]}>Date</Text>
+            <Text style={[styles.tableHeaderText, styles.tableCell]}>Subject</Text>
             <Text style={[styles.tableHeaderText, styles.tableCell]}>Status</Text>
           </View>
           {filteredAttendance.map((item, index) => (
@@ -221,7 +223,7 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId }) => {
           ))}
           {filteredAttendance.length === 0 && (
             <View style={styles.tableRow}>
-              <Text style={[styles.tableCell, styles.noRecordsText]} colSpan={3}>
+              <Text style={[styles.tableCell, styles.noRecordsText]}>
                 No attendance records found
               </Text>
             </View>
